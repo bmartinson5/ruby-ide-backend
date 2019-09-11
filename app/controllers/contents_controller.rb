@@ -1,12 +1,19 @@
 class ContentsController < ApplicationController
   def index
-    @contents = Content.all
-    json_response(@contents)
+    json_response("")
   end
 
   def create
     content = Content.create!(content_params)
-    json_response(content)
+    $stdout = File.new('console.out', 'w')
+    $stdout.sync = true
+    # content = eval(File.read 'test.rb')
+    code = "5.times do p 'hi' end"
+    # code = ""
+
+    eval(code)
+    textOutput = File.read('console.out')
+    json_response(textOutput)
   end
 
   def show
@@ -15,7 +22,6 @@ class ContentsController < ApplicationController
   end
 
   def find_problem
-    byebug
     content = Content.where(problem_index: params[:problem_index])
     json_response(content)
   end
