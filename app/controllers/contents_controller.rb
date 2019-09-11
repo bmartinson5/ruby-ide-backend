@@ -5,19 +5,7 @@ class ContentsController < ApplicationController
 
   def create
     content = Content.create!(content_params)
-    $stdout = File.new('console.out', 'w')
-    $stdout.sync = true
-    # content = eval(File.read 'test.rb')
-    # code = "5.times do p 'hi' end"
-    code = ""
-    blocks = content_params[:content]["blocks"]
-    blocks.each do |block, index|
-      code << block[:text]
-    end
-
-    eval(code)
-    textOutput = File.read('console.out')
-    json_response(textOutput)
+    json_response(content)
   end
 
   def show
@@ -28,6 +16,29 @@ class ContentsController < ApplicationController
   def find_problem
     content = Content.where(problem_index: params[:problem_index])
     json_response(content)
+  end
+
+  def run_code
+    $stdout = File.new('console.out', 'w')
+    $stdout.sync = true
+    # content = eval(File.read 'test.rb')
+    # code = "5.times do p 'hi' end"
+    code = ""
+    blocks = content_params[:content]["blocks"]
+    blocks.each do |block, index|
+      code << block[:text]
+      code << "\n"
+    end
+
+    begin
+      eval(code)
+    rescue Exception => e
+      puts e
+    end
+
+    textOutput = File.read('console.out')
+    # json_response(code)
+    json_response(textOutput)
   end
 
   private
