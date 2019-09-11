@@ -8,8 +8,12 @@ class ContentsController < ApplicationController
     $stdout = File.new('console.out', 'w')
     $stdout.sync = true
     # content = eval(File.read 'test.rb')
-    code = "5.times do p 'hi' end"
-    # code = ""
+    # code = "5.times do p 'hi' end"
+    code = ""
+    blocks = content_params[:content]["blocks"]
+    blocks.each do |block, index|
+      code << block[:text]
+    end
 
     eval(code)
     textOutput = File.read('console.out')
