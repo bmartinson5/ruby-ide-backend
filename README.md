@@ -32,14 +32,16 @@ Future feature goals:
 4.  Install postgres and start postgres server
     https://www.learnhowtoprogram.com/ruby-and-rails/getting-started-with-ruby/installing-postgres
 
-5. Run the following commands in the console:
+5.  Run the following commands in the console:
 ```
 bundle install
 rake db:create
 rake db:migrate
 rails start -p 3001
 ```
-6. The server is now running on port 3001 and the frontend can make api calls to it
+6.  Follow steps in https://github.com/bmartinson5/ruby-ide/blob/master/README.md 
+    to run the frontend server
+7.  The server is now running on port 3001 and the frontend can make api calls to it
 
 ## Known Bugs
 
