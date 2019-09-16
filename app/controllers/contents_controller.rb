@@ -23,8 +23,8 @@ class ContentsController < ApplicationController
         ["3", "4", "5"],
         ["2", "15"],
         [],
-        [],
-        ["[1,2,3]", "[1, 8, 6, 4]"]
+        ["\"eroh\", \"hero\"", "\"HleOl\", \"HellO\"", "\"not\", \"aword\""],
+        ["[1,2,3]", "[1, 8, 6, 4]", "[-1, -2, -3]"]
       ]
 
     tests = []
@@ -66,8 +66,9 @@ class ContentsController < ApplicationController
       test_output.push(File.read("test#{index+1}.out"))
     end
     $stdout = old_stdout
-    test_output[0] = test_output[0].gsub(/\n/, '')
-    test_output[1] = test_output[1].gsub(/\n/, '')
+    test_output.each_with_index do |output, index|
+      test_output[index] = output.gsub(/\n/, '')
+    end
 
     # json_response(code)
     json_response(test_output)
