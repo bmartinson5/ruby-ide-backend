@@ -56,12 +56,11 @@ class ContentsController < ApplicationController
       rescue Exception => e
         puts e
       end
-      test_output = File.read('test2.out')
+      test_output.push(File.read("test#{index+1}.out"))
     end
 
-    textOutput = File.read('test2.out')
     # json_response(code)
-    json_response(textOutput)
+    json_response(test_output)
   end
 
   private
