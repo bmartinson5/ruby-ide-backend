@@ -18,9 +18,25 @@ class ContentsController < ApplicationController
     json_response(content)
   end
 
+  def create_tests(function_name, initial_code, problem_index)
+    test_params = [["3", "4", "5"], ["2", "1"]]
+    tests = []
+    test_params[problem_index].each do |param|
+      test = initial_code.dup
+      test << function_name
+      test << "("
+      test << param
+      test << ")"
+      test << "\n"
+      tests.push(test)
+    end
+
+    return tests
+
+  end
+
   def run_code
-    $stdout = File.new('console.out', 'w')
-    $stdout.sync = true
+    function_name = content_params[:function_name]
     # content = eval(File.read 'test.rb')
     # code = "5.times do p 'hi' end"
     code = ""
@@ -29,21 +45,28 @@ class ContentsController < ApplicationController
       code << block[:text]
       code << "\n"
     end
+    tests = create_tests(function_name,code, 1)
 
-    begin
-      eval(code)
-    rescue Exception => e
-      puts e
+    test_output = []
+    tests.each_with_index do |test, index|
+      $stdout = File.new("test#{index+1}.out", 'w')
+      $stdout.sync = true
+      begin
+        eval(test)
+      rescue Exception => e
+        puts e
+      end
+      test_output = File.read('test2.out')
     end
 
-    textOutput = File.read('console.out')
+    textOutput = File.read('test2.out')
     # json_response(code)
     json_response(textOutput)
   end
 
   private
    def content_params
-     params.permit(:problem_index, content: [entityMap: {}, blocks: [:key, :text, :type, :depth, inlineStyleRanges: [], entityRanges: [], data: {}]])
+     params.permit(:function_name, :problem_index, content: [entityMap: {}, blocks: [:key, :text, :type, :depth, inlineStyleRanges: [], entityRanges: [], data: {}]])
    end
 
 end
