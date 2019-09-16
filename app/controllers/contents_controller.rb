@@ -45,7 +45,7 @@ class ContentsController < ApplicationController
       code << block[:text]
       code << "\n"
     end
-    tests = create_tests(function_name,code, 1)
+    tests = create_tests(function_name,code, content_params[:problem_index].to_i)
 
     test_output = []
     tests.each_with_index do |test, index|
