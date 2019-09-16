@@ -19,10 +19,18 @@ class ContentsController < ApplicationController
   end
 
   def create_tests(function_name, initial_code, problem_index)
-    test_params = [["3", "4", "5"], ["2", "1"]]
+    test_params = [
+        ["3", "4", "5"],
+        ["2", "15"],
+        [],
+        [],
+        ["[1,2,3]", "[1, 8, 6, 4]"]
+      ]
+
     tests = []
     test_params[problem_index].each do |param|
       test = initial_code.dup
+      test << "p "
       test << function_name
       test << "("
       test << param
@@ -30,7 +38,6 @@ class ContentsController < ApplicationController
       test << "\n"
       tests.push(test)
     end
-
     return tests
 
   end
@@ -46,8 +53,8 @@ class ContentsController < ApplicationController
       code << "\n"
     end
     tests = create_tests(function_name,code, content_params[:problem_index].to_i)
-
     test_output = []
+    old_stdout = $stdout.dup
     tests.each_with_index do |test, index|
       $stdout = File.new("test#{index+1}.out", 'w')
       $stdout.sync = true
@@ -58,6 +65,9 @@ class ContentsController < ApplicationController
       end
       test_output.push(File.read("test#{index+1}.out"))
     end
+    $stdout = old_stdout
+    test_output[0] = test_output[0].gsub(/\n/, '')
+    test_output[1] = test_output[1].gsub(/\n/, '')
 
     # json_response(code)
     json_response(test_output)
