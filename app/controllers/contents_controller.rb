@@ -21,7 +21,7 @@ class ContentsController < ApplicationController
   def create_tests(function_name, initial_code, problem_index)
     test_params = [
         ["[3, 3, 1], 6", "[-4, 6, -8, 1], -3", "[-3, -2, -1, -9], -10"],
-        ["\"tower\"", "\"hannah\"", "\"RACECAR\"", "\"RaDaR\"", ],
+        ["\"tower\"", "\"hannah\"", "\"A man, a plan, a canal: Panama\"" ],
         ["\"eroh\", \"hero\"", "\"HleOl\", \"HellO\"", "\"not\", \"aword\""],
         ["[1,2,3]", "[1, 8, 6, 4]", "[-1, -2, -3]"]
       ]
