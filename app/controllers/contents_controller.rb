@@ -1,6 +1,6 @@
 class ContentsController < ApplicationController
   def index
-    json_response("")
+    json_response("server has responded")
   end
 
   def create
