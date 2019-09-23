@@ -1,5 +1,4 @@
 require 'timeout'
-include Shikashi
 
 class ContentsController < ApplicationController
   def index
@@ -72,7 +71,7 @@ class ContentsController < ApplicationController
 
   def secure_check(code)
       functions_defined = find_defined_functions(code)
-      functions_permitted = ["to_s", "each", "split"] + functions_defined
+      functions_permitted = Content.permitted_functions + functions_defined
       functions_called = find_called_functions(code)
       functions_called.each do |function_name|
         if !(functions_permitted.include? function_name)
@@ -87,7 +86,7 @@ class ContentsController < ApplicationController
   end
 
   def find_called_functions(code)
-    methods = code.scan(/\.(([a-z]|[A-Z]|\_)+)/).map { |name| name[0]}
+    methods = code.scan(/[a-z]+\.(([a-z]|[A-Z]|\_)+)/).map { |name| name[0]}
     functions = code.scan(/(([a-z]|[A-Z]|\_)+)\(/).map { |name| name[0]}
     return methods + functions
   end
