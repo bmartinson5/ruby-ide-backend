@@ -69,17 +69,21 @@ class ContentsController < ApplicationController
     test_output
   end
 
-  def secure_check(code)
+  def check_unpermitted_objects(code)
+    return code.match(/^\s*(File|Dir|stdout|ARGV|IO|require|include)(\.|\s|$|\()/)
+  end
+
+  def check_unpermitted_functions(code)
       functions_defined = find_defined_functions(code)
       functions_permitted = Content.permitted_misc_functions + Content.permitted_arr_functions +
                             Content.permitted_str_functions + Content.permitted_object_functions + functions_defined
       functions_called = find_called_functions(code)
       functions_called.each do |function_name|
         if !(functions_permitted.include? function_name)
-          return false
+          return function_name
         end
       end
-      true
+      false
   end
 
   def find_defined_functions(code)
@@ -101,15 +105,19 @@ class ContentsController < ApplicationController
       code << "\n"
     end
 
-
-
     old_stdout = $stdout.dup
-    if secure_check(code)
-      tests = create_tests(function_name, code, content_params[:problem_index].to_i)
-      test_output = run_tests(tests)
-    else
-      test_output = ["security failed"]
+    unpermitted_function = check_unpermitted_functions(code)
+    if unpermitted_function
+      return json_response(["Unpermitted or Undefined Function Call: '#{unpermitted_function}'"])
     end
+
+    unpermitted_object = check_unpermitted_objects(code)
+    if unpermitted_object
+      return json_response(["Unpermitted Object Reference: '#{unpermitted_object}'"])
+    end
+
+    tests = create_tests(function_name, code, content_params[:problem_index].to_i)
+    test_output = run_tests(tests)
     $stdout = old_stdout
     # json_response(code)
     json_response(test_output)
