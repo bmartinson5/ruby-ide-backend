@@ -1,3 +1,6 @@
+require 'timeout'
+include Shikashi
+
 class ContentsController < ApplicationController
   def index
     json_response("server has responded")
@@ -29,7 +32,7 @@ class ContentsController < ApplicationController
     tests = []
     test_params[problem_index].each do |param|
       test = initial_code.dup
-      test << "p "
+      test << "print "
       test << function_name
       test << "("
       test << param
@@ -41,34 +44,73 @@ class ContentsController < ApplicationController
 
   end
 
+
+  def run_tests(tests)
+    test_output = []
+    tests.each_with_index do |test, index|
+      $stdout = File.new("test#{index+1}.out", 'w')
+      $stdout.sync = true
+
+      proc = Proc.new do
+        $SAFE = 1
+        begin
+          Timeout::timeout(1) do
+            eval(test)
+          end
+        rescue Exception => e
+          puts 'Error: ' << e.to_s
+        end
+      end
+      proc.call
+      test_output.push(File.read("test#{index+1}.out"))
+    end
+    test_output.each_with_index do |output, index|
+      test_output[index] = output.gsub(/\n/, '')
+    end
+    test_output
+  end
+
+  def secure_check(code)
+      functions_defined = find_defined_functions(code)
+      functions_permitted = ["to_s", "each", "split"] + functions_defined
+      functions_called = find_called_functions(code)
+      functions_called.each do |function_name|
+        if !(functions_permitted.include? function_name)
+          return false
+        end
+      end
+      true
+  end
+
+  def find_defined_functions(code)
+    code.scan(/def (([a-z]|\_)+)/).map { |name| name[0]}
+  end
+
+  def find_called_functions(code)
+    methods = code.scan(/\.(([a-z]|[A-Z]|\_)+)/).map { |name| name[0]}
+    functions = code.scan(/(([a-z]|[A-Z]|\_)+)\(/).map { |name| name[0]}
+    return methods + functions
+  end
+
   def run_code
     function_name = content_params[:function_name]
-    # content = eval(File.read 'test.rb')
-    # code = "5.times do p 'hi' end"
     code = ""
     blocks = content_params[:content]["blocks"]
     blocks.each do |block, index|
       code << block[:text]
       code << "\n"
     end
-    tests = create_tests(function_name,code, content_params[:problem_index].to_i)
-    test_output = []
+
+
+
     old_stdout = $stdout.dup
-    tests.each_with_index do |test, index|
-      $stdout = File.new("test#{index+1}.out", 'w')
-      $stdout.sync = true
-      begin
-        eval(test)
-      rescue Exception => e
-        puts e
-      end
-      test_output.push(File.read("test#{index+1}.out"))
+    if secure_check(code)
+      tests = create_tests(function_name, code, content_params[:problem_index].to_i)
+      test_output = run_tests(tests)
+    else
+      test_output = ["security failed"]
     end
     $stdout = old_stdout
-    test_output.each_with_index do |output, index|
-      test_output[index] = output.gsub(/\n/, '')
-    end
-
     # json_response(code)
     json_response(test_output)
   end
