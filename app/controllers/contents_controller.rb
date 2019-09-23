@@ -71,7 +71,8 @@ class ContentsController < ApplicationController
 
   def secure_check(code)
       functions_defined = find_defined_functions(code)
-      functions_permitted = Content.permitted_functions + functions_defined
+      functions_permitted = Content.permitted_misc_functions + Content.permitted_arr_functions +
+                            Content.permitted_str_functions + Content.permitted_object_functions + functions_defined
       functions_called = find_called_functions(code)
       functions_called.each do |function_name|
         if !(functions_permitted.include? function_name)
