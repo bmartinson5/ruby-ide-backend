@@ -105,16 +105,17 @@ class ContentsController < ApplicationController
       code << "\n"
     end
 
+    unpermitted_object = check_unpermitted_objects(code)
+    if unpermitted_object
+      return json_response(["Unpermitted Object Reference: '#{unpermitted_object}'"])
+    end
+    
     old_stdout = $stdout.dup
     unpermitted_function = check_unpermitted_functions(code)
     if unpermitted_function
       return json_response(["Unpermitted or Undefined Function Call: '#{unpermitted_function}'"])
     end
 
-    unpermitted_object = check_unpermitted_objects(code)
-    if unpermitted_object
-      return json_response(["Unpermitted Object Reference: '#{unpermitted_object}'"])
-    end
 
     tests = create_tests(function_name, code, content_params[:problem_index].to_i)
     test_output = run_tests(tests)
